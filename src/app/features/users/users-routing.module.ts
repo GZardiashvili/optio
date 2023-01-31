@@ -1,11 +1,11 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {UserListComponent} from "./list/user-list.component";
+import {ManagerComponent} from "./manager/manager.component";
 
 const routes: Routes = [
   {
     path: '',
-    component: UserListComponent,
+    component: ManagerComponent,
     pathMatch: 'full'
   },
 ];
