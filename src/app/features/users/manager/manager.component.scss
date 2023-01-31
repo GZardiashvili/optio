@@ -1,0 +1,24 @@
+.user-manager {
+  grid-template-rows: 1fr 2fr;
+  .user-manager__header {
+    .user-manager__action {
+      margin-left: 1rem;
+      border: none;
+      background: none;
+      outline: none;
+      color: #4F45E4;
+    }
+    .header{
+      display:flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: right;
+    }
+    .example-container{
+      .example-sidenav{
+        width: 30%;
+        height: 100vh;
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+<div class="grid user-manager">
+  <div class="user-manager__header">
+    <mat-drawer-container class="example-container">
+      <mat-drawer #drawer
+                  class="example-sidenav"
+                  mode="side"
+                  position="end">
+        <app-user-form (closed)="drawer.toggle()" ></app-user-form>
+      </mat-drawer>
+      <mat-drawer-content>
+        <div class='header'>
+          <button class="user-manager__action" mat-raised-button (click)="drawer.toggle()">+ Add</button>
+        </div>
+        <app-user-list (findById)="findUser($event)" (clicked) = 'drawer.toggle()'></app-user-list>
+
+      </mat-drawer-content>
+    </mat-drawer-container>
+  </div>
+</div>
+
+
