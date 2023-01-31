@@ -5,20 +5,17 @@
                   class="example-sidenav"
                   mode="side"
                   position="end">
-        <app-user-form></app-user-form>
+        <app-user-form (closed)="drawer.toggle()" ></app-user-form>
       </mat-drawer>
       <mat-drawer-content>
-        <div class="user-manager__search">
-          <app-search [placeholder]="placeholder"></app-search>
+        <div class='header'>
+          <button class="user-manager__action" mat-raised-button (click)="drawer.toggle()">+ Add</button>
         </div>
-        <button class="user-manager__action" mat-raised-button (click)="drawer.toggle()">+ Add</button>
-        <app-user-list></app-user-list>
+        <app-user-list (findById)="findUser($event)" (clicked) = 'drawer.toggle()'></app-user-list>
 
       </mat-drawer-content>
     </mat-drawer-container>
   </div>
-  <!--  <app-user-form *ngIf="showForm" (onSubmit)="onSubmit($event)"></app-user-form>-->
 </div>
-
 
 

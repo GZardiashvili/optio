@@ -1,9 +1,12 @@
-import {Component} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup, FormGroupDirective, NgForm, Validators} from "@angular/forms";
 import {UserGeneralForm} from "../entity/user-general-form";
 import {ErrorStateMatcher} from "@angular/material/core";
-import {MatChipEditedEvent, MatChipInputEvent} from "@angular/material/chips";
-import {COMMA, ENTER} from "@angular/cdk/keycodes";
+import {User} from "../entity/user";
+import {Subject, takeUntil} from "rxjs";
+import {UsersService} from "../services/users.service";
+import {CommonService} from "../../../common/common.service";
+import {RolesService} from "../services/roles.service";
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class MyErrorStateMatcher implements ErrorStateMatcher {
@@ -18,67 +21,118 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
   templateUrl: './user-form.component.html',
   styleUrls: ['./user-form.component.scss']
 })
-export class UserFormComponent {
+export class UserFormComponent implements OnInit {
+  private componentIsDestroyed$ = new Subject<boolean>();
   matcher = new MyErrorStateMatcher();
-
+  @Output() closed = new EventEmitter();
+  @Input() value: User | undefined;
   form = new FormGroup<UserGeneralForm>(
     {
-      firstName: new FormControl<string>(''),
-      lastName: new FormControl<string>(''),
-      email: new FormControl<string>('',[Validators.required, Validators.email]),
-      roles: new FormControl<string[]>([]),
-      locked: new FormControl<boolean>(false, [Validators.requiredTrue])
+      firstName: new FormControl<string>('', Validators.required),
+      lastName: new FormControl<string>('', Validators.required),
+      email: new FormControl<string>('', [Validators.required, Validators.email]),
+      roles: new FormControl('', [Validators.required]),
+      locked: new FormControl<boolean>(true, [Validators.required])
     }
   )
+  id: string | null = null;
+  roles: any[] = [];
 
   get emailFormControl() {
     return this.form.get('email') as FormControl<string>;
   }
 
+  get rolesFormControl() {
+    return this.form.get('roles') as FormControl<any>;
+  }
+
+  get firstNameFormControl() {
+    return this.form.get('firstName') as FormControl<string>;
+  }
+
+  get lastNameFormControl() {
+    return this.form.get('lastName') as FormControl<string>;
+  }
+
   get lockedFormControl() {
     return this.form.get('locked') as FormControl<boolean>;
   }
-  constructor() {
+
+  constructor(private usersService: UsersService,
+              private rolesService: RolesService,
+              private commonService: CommonService) {
   }
 
-  addOnBlur = true;
-  readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  fruits: any[] = [{name: 'Lemon'}, {name: 'Lime'}, {name: 'Apple'}];
-
-  add(event: MatChipInputEvent): void {
-    const value = (event.value || '').trim();
-
-    // Add our fruit
-    if (value) {
-      this.fruits.push({name: value});
-    }
-
-    // Clear the input value
-    event.chipInput!.clear();
+  ngOnInit() {
+    this.setValue()
+    this.getRoles()
   }
 
-  remove(fruit: any): void {
-    const index = this.fruits.indexOf(fruit);
+  setValue() {
+    this.commonService.getSearchTerm().subscribe((id: string) => {
+      this.id = id;
+      if (id) {
+        this.usersService.findOne(id).subscribe(
+          (user: any) => {
+            this.form.patchValue(user.data);
+          }
+        );
+      } else {
+        this.form.reset()
+      }
 
-    if (index >= 0) {
-      this.fruits.splice(index, 1);
+    })
+  }
+
+  saveUser() {
+
+    console.log(this.id == null)
+    console.log(this.form.value)
+    if (this.form.valid) {
+      if (this.id) {
+        const user = {
+          id: this.id ? this.id : null,
+          ...this.form.value,
+        }
+        this.usersService.saveUser(user)
+          .pipe(takeUntil(this.componentIsDestroyed$))
+          .subscribe(
+            () => {
+              this.commonService.sendUpdate(true)
+              console.log('User saved');
+              this.close()
+            },
+          );
+        console.log('exsisted')
+      } else {
+        const user = {
+          ...this.form.value,
+        }
+        this.usersService.saveUser(user)
+          .pipe(takeUntil(this.componentIsDestroyed$))
+          .subscribe(
+            () => {
+              this.commonService.sendUpdate(true)
+              console.log('User saved');
+              this.close()
+            },
+          );
+        console.log('new')
+      }
     }
   }
 
-  edit(fruit: any, event: MatChipEditedEvent) {
-    const value = event.value.trim();
-
-    // Remove fruit if it no longer has a name
-    if (!value) {
-      this.remove(fruit);
-      return;
-    }
-
-    // Edit existing fruit
-    const index = this.fruits.indexOf(fruit);
-    if (index >= 0) {
-      this.fruits[index].name = value;
-    }
+  getRoles() {
+    this.rolesService.getRoles().subscribe(
+      (roles: any) => {
+        this.roles = roles.data.entities;
+      })
   }
+
+  close() {
+    this.form.reset()
+    this.closed.emit()
+    this.id = null
+  }
+
 }
-

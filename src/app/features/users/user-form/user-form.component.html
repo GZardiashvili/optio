@@ -1,11 +1,11 @@
 <form class="flex example-form">
   <mat-form-field class="example-full-width">
     <mat-label>FirstName</mat-label>
-    <input matInput placeholder="enter firstname">
+    <input matInput placeholder="enter firstname" [formControl]="firstNameFormControl">
   </mat-form-field>
   <mat-form-field class="example-full-width">
     <mat-label>LastName</mat-label>
-    <input matInput placeholder="enter lastname">
+    <input matInput placeholder="enter lastname" [formControl]="lastNameFormControl">
   </mat-form-field>
   <mat-form-field class="example-full-width">
     <mat-label>Email</mat-label>
@@ -22,37 +22,26 @@
   <mat-form-field appearance="fill" class="example-full-width">
     <mat-label>User Status</mat-label>
     <mat-select [formControl]="lockedFormControl" required>
-      <mat-option >
-        active
+      <mat-option [value]="true">
+        Active
+      </mat-option>
+      <mat-option [value]="false">
+        Inactive
       </mat-option>
     </mat-select>
-    <mat-error *ngIf="lockedFormControl.hasError('required')">Please choose an animal</mat-error>
-<!--    <mat-hint>{{lockedFormControl.value?.sound}}</mat-hint>-->
+    <mat-error *ngIf="lockedFormControl.hasError('required')">Please choose a status</mat-error>
   </mat-form-field>
 
-  <mat-form-field class="example-chip-list" appearance="fill">
-    <mat-label>Favorite Fruits</mat-label>
-    <mat-chip-grid #chipGrid aria-label="Enter fruits">
-      <mat-chip-row *ngFor="let fruit of fruits"
-                    (removed)="remove(fruit)"
-                    [editable]="true"
-                    (edited)="edit(fruit, $event)"
-                    [aria-description]="'press enter to edit ' + fruit.name">
-        {{fruit.name}}
-        <button matChipRemove [attr.aria-label]="'remove ' + fruit.name">
-          <mat-icon>cancel</mat-icon>
-        </button>
-      </mat-chip-row>
-      <input placeholder="New fruit..."
-             [matChipInputFor]="chipGrid"
-             [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-             [matChipInputAddOnBlur]="addOnBlur"
-             (matChipInputTokenEnd)="add($event)"/>
-    </mat-chip-grid>
+  <mat-form-field appearance="fill">
+    <mat-label>Roles</mat-label>
+    <mat-select [formControl]="rolesFormControl" multiple>
+      <mat-option *ngFor="let role of roles" [value]="role.code">{{role.name}}</mat-option>
+    </mat-select>
   </mat-form-field>
+
 </form>
 
 <mat-card-actions>
-  <button mat-raised-button color="warn">Cancel</button>
-  <button mat-raised-button color="primary">Save</button>
+  <button mat-raised-button color="warn" (click)="close()">Cancel</button>
+  <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="saveUser()">Save</button>
 </mat-card-actions>

@@ -1,4 +1,6 @@
-import {Component} from '@angular/core';
+import {Component, EventEmitter, Output} from '@angular/core';
+import {User} from "../entity/user";
+import {CommonService} from "../../../common/common.service";
 
 @Component({
   selector: 'app-manager',
@@ -7,10 +9,11 @@ import {Component} from '@angular/core';
 })
 export class ManagerComponent {
   readonly placeholder: string = 'Search users';
-  constructor() {
+  value!: User ;
+  constructor(private commonService: CommonService) {
   }
-
-  addUser() {
-
+  findUser(id: string) {
+    this.commonService.sendSearchTerm(id)
   }
 }
+
